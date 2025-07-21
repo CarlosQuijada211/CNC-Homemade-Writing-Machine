@@ -73,4 +73,8 @@ These limitations are by design, reflecting the project's educational and proof-
 
 - **Materials Used**: The frame and structural supports are made from hard cardboard, offering a lightweight and accessible foundation. Motion is enabled through two threaded rods acting as screw-driven linear actuators, each rotating to move a nut along its axis, allowing to move the carriages. Wooden rods serve as linear guides, while segments of recycled drinking straws are used as improvised bushings to reduce friction between the moving parts and the guides.
 
-- **Design Philosophy**: The project prioritizes accessibility, low cost, and ease of construction using common or recycled materials. It is intended as an educational tool, enabling students and hobbyists to explore robotics and automation without requiring specialized tools or expensive components. While not built for industrial precision, it demonstrates core CNC principles in a hands-on, reproducible way.
+- **Design Philosophy**: The project prioritizes accessibility, low cost, and ease of construction using common or recycled materials. It is an educational tool, that can allow students to explore robotics and mechanical concepts without the need of specialized tools or expensive components. It is not aimed for industrial precision or as a product, but as a demonstration of core CNC principles and practice of the engineering mindset.
+
+### Frame and Base
+The frame of each axis is built from hard cardboard and is made up from two main pieces, protrayed in the layout below: 
+
