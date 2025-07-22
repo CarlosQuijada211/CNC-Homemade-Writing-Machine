@@ -146,11 +146,127 @@ The electronic control system is centered around an Arduino Mega, which controls
 
 ## Software and Logic
 ### Overview
-To convert an external image into drawing instructions for the machine, the input must pass through a structured software pipeline. The process begins in Inkscape, where the image is converted into a vector path, and then into G-code using the J Tech Laser Tool extension. This G-code is not directly compatible with the Arduino, so it is parsed and translated into a simplified, custom instruction format by a Python script.
+To convert an external image into drawing instructions for the machine, the input must pass through a structured software pipeline. The process begins in **Inkscape**, where the image is converted into a vector path, and then into **G-code** using the **J Tech Laser Tool extension**. This **G-code** is not directly compatible with the Arduino, so it is parsed and translated into a simplified, custom instruction format by a Python script.
 
-The central script, interface.py, provides a graphical interface that guides the user through this process. It asks for the name of the G-code file, handles translation via helper scripts, and offers an optional preview of the final drawing. It also splits the output into organized .txt files, each containing up to 2500 instructions to respect Arduino's memory constraints.
+The central script, `interface.py`, provides a graphical interface that guides the user through this process. It asks for the name of the** G-code** file, handles translation via helper scripts, and offers an optional preview of the final drawing. It also splits the output into organized `.txt` files, each containing up to **2500** instructions to respect Arduino's memory constraints.
 
-Finally, these processed instructions are inserted into the Arduino’s firmware, specifically the CNCWritingMachine.ino file, where they are executed to control the stepper motors and pen mechanism.
+Finally, these processed instructions are inserted into the Arduino’s firmware, specifically the `CNCWritingMachine.ino` file, where they are executed to control the stepper motors and pen mechanism.
 
 ### Firmware Files (Arduino Code)
+#### `JoystickFree.ino` **– Manual Control Mode**
+This Arduino sketch enables manual control of the CNC machine using a joystick and serial input. It is mainly used for testing, calibration, and positioning before running automatic drawing routines.
 
+**Main Features**
+- **Joystick movement:** Controls two stepper motors (X and Y axes) in real time.
+- **Serial input:** Allows setting the servo angle (0–180°) to raise or lower the pen.
+- **Joystick button:** Prints current motor step counts and servo angle for calibration/debugging.
+- Used as a setup tool—not for drawing—this file provides hands-on control of the machine’s axes and pen.
+
+#### `CNCWritingMachine.ino` – Main Drawing Controller
+This is the core program that executes drawing instructions on the CNC writing machine. It reads a predefined array of movement and pen commands and moves the motors and servo accordingly.
+
+**Key Components**
+- **Stepper Motors:** Controlled using `AccelStepper` and `MultiStepper` for synchronized X and Y axis motion.
+- **Servo:** Moves the pen up (0°) or down (180°) based on the current instruction.
+- **Instruction Array** (`path[]`):
+The most critical element of this file. It holds all the drawing commands in flash memory (PROGMEM) to save RAM. Each Instruction contains:
+  - `x_steps`: target position on the X axis (in steps)
+  - `y_steps`: target position on the Y axis (in steps)
+  - `markerDown`: whether the pen should be down (true) or up (false)
+  The array is filled externally by the user via the Python interface, and instructions are executed one-by-one inside the `loop()`.
+
+**Execution Flow**
+1. Load the next instruction from `path[]`.
+2. Move both motors to the target position.
+3. Raise or lower the pen accordingly.
+4. Repeat until all instructions are completed.
+
+This file must be updated with a new path[] array every time a new drawing is uploaded
+
+### Python Processing Scripts
+#### `interface.py` – User Interface for Instruction Generation
+This file provides a simple graphical interface (built with `tkinter`) that allows users to process G-code files and generate instructions for the CNC writing machine.
+
+**Purpose**
+- It serves as the main user entry point to the software stack. From here, users can:
+- Specify the name of a G-code file.
+- Choose to preview the drawing using Turtle graphics.
+- Choose to generate `.txt` instruction files for the Arduino sketch.
+
+**Key Features**
+- **Two Main Options:**
+  - **Show preview:** Visualizes the drawing.
+  - **Generate instruction files:** Creates Arduino-friendly text files split into 2500-instruction chunks.
+- **Filename Validation:** Uses `check_filename()` from gcode.py to verify the G-code file exists.
+- **Centralized Processing:** Delegates actual logic to `generate_file()` and `generate_preview()` functions.
+
+**Flow Summary**
+- User inputs the G-code filename.
+- Selects one or both checkboxes.
+- Upon clicking "Generate":
+  - The program validates input.
+  - Based on selection, it either previews, generates instruction files, or both.
+
+**Dependencies**
+- `gcode.py`: for core processing logic.
+ -`preview.py`: indirectly used for rendering the drawing.
+
+#### `gcode.py` – G-code Parsing and Instruction Generation
+This file handles the conversion of G-code files into simplified, Arduino-ready instructions and visual previews. It provides the core logic behind both file generation and drawing preview functionality.
+
+**Function Overview:**
+- `gcode_to_instructions(gcode_lines)`
+  - **Purpose:** Parses a list of G-code lines and converts them into a list of tuples: (x, y, pen_down).
+  - **Details:**
+    - Extracts X and Y coordinates from G0 or G1 commands.
+    - Interprets M03 as pen down and M05 as pen up.
+    - Output: list of (x, y, bool) tuples in integer format.
+
+- `to_arduino_code(instructions)`
+  - **Purpose:** Converts coordinate instructions into Arduino-ready format.
+  - **Details:**
+    - Scales the (x, y) positions from mm to internal motor steps using a constant (*6368/10).
+    - Formats each line as: `{x, y, true/false},`
+
+- `generate_file(file)`
+  - **Purpose:** Reads a G-code file and writes Arduino instruction text files to disk.
+  - **Details:**
+   - Loads .gcode file and parses it into instructions.
+   - If instructions ≤ 2500 → writes a single `.txt` file.
+   - If >2500:
+     - Splits into chunks of ≤2500 lines.
+     - Adds transitional instructions to ensure pen-up between chunks.
+     - Saves each chunk as a numbered file in a subfolder (Instructions/filename/).
+
+- `generate_preview(file)`
+  - **Purpose:** Displays a visual preview of the parsed instructions using Turtle graphics.
+  - **Details:**
+    - Reads and parses the .gcode file.
+    - Calls draw() from preview.py to render the result.
+
+- `check_filename(file)`
+  - **Purpose:** Checks if the given .gcode file exists in the Gcode/ folder.
+  - **Returns:** True if it exists, False otherwise.
+
+This file is the processing core of the project. Everything that turns user input into machine-ready or human-readable output happens here.
+
+#### `preview.py` – Path Visualization Tool
+This file uses Python’s Turtle graphics to display a visual preview of the drawing path based on parsed instructions.
+
+- `draw(instructions)`
+  - **Purpose:** Visually renders the movement path of the drawing machine.
+  - **Details:**
+    - Sets up a Turtle canvas scaled to match the machine’s drawing area.
+    - Draws the machine boundary box.
+    - Iterates over the list of (x, y, pen_down) instructions.
+    - Moves the turtle without drawing if pen_down is False.
+    - Draws lines if pen_down is True.
+   
+### Third-Party Software – Inkscape (v0.92)
+To generate G-code for the CNC writing machine, I use Inkscape version 0.92, the latest release compatible with the J Tech Laser Tool extension.
+
+**Workflow:**
+  - I begin by setting the document size to 135 mm × 113 mm, matching the machine’s physical drawing area.
+  - An image is imported and converted into a bitmap.
+  - The bitmap is vectorized, and I intentionally flatten Bézier curves with a flatness value of 0.1, increasing the number of nodes to maximize positional accuracy.
+  - The resulting vector paths are then exported to G-code using the J Tech Laser Tool extension, ready for processing by the instruction generator.
