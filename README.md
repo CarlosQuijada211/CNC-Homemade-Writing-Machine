@@ -76,5 +76,30 @@ These limitations are by design, reflecting the project's educational and proof-
 - **Design Philosophy**: The project prioritizes accessibility, low cost, and ease of construction using common or recycled materials. It is an educational tool, that can allow students to explore robotics and mechanical concepts without the need of specialized tools or expensive components. It is not aimed for industrial precision or as a product, but as a demonstration of core CNC principles and practice of the engineering mindset.
 
 ### Frame and Base
-The frame of each axis is built from hard cardboard and is made up from two main pieces, protrayed in the layout below: 
+
+Each axis of the machine is built using a custom frame made from hard cardboard. The basic structure consists of two main pieces: a flat **base** and upright **wall pieces**, as shown in the layout diagram below:
+
+<br>
+<p align="center">
+  <img src="/Assets/frame_layout.png" alt="Frame Layout" width="70%">
+</p>
+<br>
+
+There are two identical-looking frames in total — one for each axis (X and Y) — but they differ slightly in function and construction. The **wall pieces** are glued onto the base to form the vertical supports. Each wall is made from two layers of cardboard for added strength and contains three holes: one for a threaded rod and two for wooden guide rods that support the moving carriage.
+
+The **bottom frame** (Y-axis) serves as the foundation. Its base is made from three stacked cardboard layers to increase weight and stability. The **second frame** (X-axis) is mounted on top of the Y-axis carriage. Its base only uses a single layer of cardboard to keep it lightweight, since it needs to move smoothly along the Y-axis.
+
+On the carriage of the top frame, the servo motor and pen holder are mounted to perform the drawing operation. At the opposite end of this frame, a small **support wheel** is attached. This helps maintain balance and allows the frame to roll along the lower axis without tilting or dragging.
+
+## Motion System and Moving Carriages
+
+Motion in both axes is achieved through a screw-driven linear actuator system. Each axis consists of a 21 cm threaded rod that passes through the central holes in the frame walls. When the rod is rotated by a motor, nuts screwed onto it translate along the rod, converting rotational motion into linear motion.
+
+To couple the motor shaft to the threaded rod, a simple improvised coupler was constructed using a small plastic straw. One end of the straw is glued to the motor shaft, while the other end is press-fitted and taped onto the threaded rod. While not ideal for transmitting high torque, this lightweight and low-cost solution was effective for the relatively low mechanical demands of the system. On the opposite end of the rod, a ball bearing is mounted in the frame to support the shaft and allow free, low-friction rotation.
+
+Each moving carriage is constructed from a rectangular piece of cardboard (dimensions vary by axis, as shown in the frame diagram). Three evenly spaced nuts are glued in a straight line along the center of the carriage. These nuts engage with the threaded rod and serve as the primary actuation mechanism, ensuring stable linear motion with minimal backlash.
+
+For guidance and stability, each axis is flanked by two wooden rods parallel to the threaded rod. These serve as linear guides. To reduce friction between the carriage and the guides, small segments of drinking straws are fixed to the carriage ends. These straw sleeves slide along the wooden rods, acting as low-friction bushings. This makeshift bearing system is both lightweight and easy to implement with recycled materials, and it provides sufficient accuracy for drawing applications.
+
+The lower frame features a larger carriage to support the upper-axis assembly. The upper frame’s carriage is smaller and carries only the pen-lift mechanism. This nested design allows one axis to ride atop the other, forming a compact and efficient Cartesian system.
 
