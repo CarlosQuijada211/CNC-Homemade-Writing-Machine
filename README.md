@@ -33,9 +33,10 @@ These limitations are by design, reflecting the project's educational and proof-
 | NEMA 17 Stepper     | 2        | 1/4 Microstepping, 12V                                |
 | SG90 Servo Motor    | 1        | Controls pen lift                             |
 | 12V Power Supply    | 1        | Minimum 3A recommended                        |
-| 5V Regulator / PSU  | 1        | Powers servo independently                    |
-| Breadboard          | 1        | For prototyping                   |
+| 5V Power Supply  | 1        | Powers servo independently                    |
+| Breadboard          | 1        | Circuit Assembly                  |
 | Analog Joystick   | 1 | Custom movement and adjustment  |
+| Barrel Jack Adaptor | 2 | Connect circuit and external power sources |
 | Jumper Wires        | —        | Male-male and male-female    |
 
 ### Software Tools
@@ -91,6 +92,8 @@ The **bottom frame** (Y-axis) serves as the foundation. Its base is made from th
 
 On the carriage of the top frame, the servo motor and pen holder are mounted to perform the drawing operation. At the opposite end of this frame, a small **support wheel** is attached. This helps maintain balance and allows the frame to roll along the lower axis without tilting or dragging.
 
+These dimensions allow for a 11.3cm x 13.5cm drawing area. 
+
 ### Motion System and Moving Carriages
 
 Motion in both axes is achieved through a screw-driven linear actuator system. Each axis consists of a 21 cm threaded rod that passes through the central holes in the frame walls. When the rod is rotated by a motor, nuts screwed onto it translate along the rod, converting rotational motion into linear motion.
@@ -107,3 +110,47 @@ The lower frame features a larger carriage to support the upper-axis assembly. T
 A custom-built spring-loaded pen is used to account for slight height variations and surface irregularities caused by material imperfections and hand-assembled components. The pen mechanism includes a spring mounted at the rear of the ink tube, which continuously pushes the writing tip forward. This allows the tip to remain in contact with the drawing surface but also retract slightly if the surface is uneven, preventing excessive pressure or skipping.
 
 To control whether the pen draws or not, a string is tied around the ink tube and routed through a hole in the pen’s plastic casing. This string connects to a servo motor mounted on the frame. When the servo rotates, it pulls on the string, retracting the pen tip into its housing and lifting it off the surface. When released, the spring extends the tip again, allowing the machine to resume drawing.
+
+<br>
+<p align="center">
+  <img src="/Assets/custom_pen.png" alt="Custom Pen" width="80%">
+</p>
+<br>
+
+## Electronics and Wiring
+### Electrical System Overview
+
+The electronic control system is centered around an Arduino Mega, which controls motion by controlling two NEMA 17 stepper motors and one SG90 servo motor. Each stepper motor is driven by a DRV8825 stepper driver, which receives step and direction signals from the Arduino. Each stepper motor is configured to 1/4 microstepping. The drivers are powered by a 12V external power supply connected via a barrel jack. The SG90 servo motor, responsible for lifting and lowering the pen, is powered separately through a dedicated 5V power source, also connected via a barrel jack. Finally, a joystick module is also connected to the Arduino, enabling manual control of the stepper motors. This feature is useful for calibration, alignment, and testing purposes.
+
+### Main Components and Their Roles
+|Component|Purpose|
+|-|-|
+|Arduino Mega|main controller, runs firmware and sends control signals to drivers and servo |
+|NEMA 17 Stepper Motors (x2) | Drive X and Y axes via threaded rods |
+|DRV8825 Drivers (x2) | Interface between Arduino and stepper motors |
+|SG90 Servo Motor | Raises and lowers pen via string mechanism |
+|Analog Joystick | Allows manual control of stepper motors |
+|12V Power Supply | Powers NEMA17 Stepper motors |
+|5V Power Supply | Powers SG90 servomotor |
+|Barrel Jack Adaptor (x2) | Connects circuit and external power supply |
+|100uF capacitors (x2) | Handle voltage spikes and noise |
+| Jumper Wires | Male-male and male-female for connecting electronic components |
+|Breadboard | Allows circuit assembly |
+
+### Wiring Diagram
+<br>
+<p align="center">
+  <img src="/Assets/circuit_layout.png" alt="Custom Pen" width="80%">
+</p>
+<br>
+
+## Software and Logic
+### Overview
+To convert an external image into drawing instructions for the machine, the input must pass through a structured software pipeline. The process begins in Inkscape, where the image is converted into a vector path, and then into G-code using the J Tech Laser Tool extension. This G-code is not directly compatible with the Arduino, so it is parsed and translated into a simplified, custom instruction format by a Python script.
+
+The central script, interface.py, provides a graphical interface that guides the user through this process. It asks for the name of the G-code file, handles translation via helper scripts, and offers an optional preview of the final drawing. It also splits the output into organized .txt files, each containing up to 2500 instructions to respect Arduino's memory constraints.
+
+Finally, these processed instructions are inserted into the Arduino’s firmware, specifically the CNCWritingMachine.ino file, where they are executed to control the stepper motors and pen mechanism.
+
+### Firmware Files (Arduino Code)
+
