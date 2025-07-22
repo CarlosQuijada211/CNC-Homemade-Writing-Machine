@@ -91,11 +91,11 @@ The **bottom frame** (Y-axis) serves as the foundation. Its base is made from th
 
 On the carriage of the top frame, the servo motor and pen holder are mounted to perform the drawing operation. At the opposite end of this frame, a small **support wheel** is attached. This helps maintain balance and allows the frame to roll along the lower axis without tilting or dragging.
 
-## Motion System and Moving Carriages
+### Motion System and Moving Carriages
 
 Motion in both axes is achieved through a screw-driven linear actuator system. Each axis consists of a 21 cm threaded rod that passes through the central holes in the frame walls. When the rod is rotated by a motor, nuts screwed onto it translate along the rod, converting rotational motion into linear motion.
 
-To couple the motor shaft to the threaded rod, a simple improvised coupler was constructed using a small plastic straw. One end of the straw is glued to the motor shaft, while the other end is press-fitted and taped onto the threaded rod. While not ideal for transmitting high torque, this lightweight and low-cost solution was effective for the relatively low mechanical demands of the system. On the opposite end of the rod, a ball bearing is mounted in the frame to support the shaft and allow free, low-friction rotation.
+Each motor is mounted onto its corresponding frame and secured in place with glue. When the upper frame is installed on top of the lower one, its motor rests directly on the lower frame's moving carriage, allowing it to move along with the bottom axis. To couple the motor shaft to the threaded rod, a simple improvised coupler was constructed using a small plastic straw. One end of the straw is glued to the motor shaft, while the other end is press-fitted and taped onto the threaded rod. While not ideal for transmitting high torque, this lightweight and low-cost solution was effective for the relatively low mechanical demands of the system. On the opposite end of the rod, a ball bearing is mounted in the frame to support the shaft and allow free, low-friction rotation.
 
 Each moving carriage is constructed from a rectangular piece of cardboard (dimensions vary by axis, as shown in the frame diagram). Three evenly spaced nuts are glued in a straight line along the center of the carriage. These nuts engage with the threaded rod and serve as the primary actuation mechanism, ensuring stable linear motion with minimal backlash.
 
@@ -103,3 +103,7 @@ For guidance and stability, each axis is flanked by two wooden rods parallel to 
 
 The lower frame features a larger carriage to support the upper-axis assembly. The upper frame’s carriage is smaller and carries only the pen-lift mechanism. This nested design allows one axis to ride atop the other, forming a compact and efficient Cartesian system.
 
+### Actuator and Pen Mechanism
+A custom-built spring-loaded pen is used to account for slight height variations and surface irregularities caused by material imperfections and hand-assembled components. The pen mechanism includes a spring mounted at the rear of the ink tube, which continuously pushes the writing tip forward. This allows the tip to remain in contact with the drawing surface but also retract slightly if the surface is uneven, preventing excessive pressure or skipping.
+
+To control whether the pen draws or not, a string is tied around the ink tube and routed through a hole in the pen’s plastic casing. This string connects to a servo motor mounted on the frame. When the servo rotates, it pulls on the string, retracting the pen tip into its housing and lifting it off the surface. When released, the spring extends the tip again, allowing the machine to resume drawing.
