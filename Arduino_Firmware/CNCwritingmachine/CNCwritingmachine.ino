@@ -2,18 +2,19 @@
 #include <MultiStepper.h>
 #include <Servo.h>
 
-// Configuración de pines
+// Pin Configuration
 #define STEP_PIN1 5
 #define DIR_PIN1 6
 #define STEP_PIN2 7
 #define DIR_PIN2 8
 #define SERVO_PIN 4
 
-const float STEPS_PER_CM = 1592.0 * 4;
+// Set physical limits of the drawing area
+const float STEPS_PER_CM = 1592.0 * 4; // Account for microstepping
 const float MAX_X_CM = 13.5;
 const float MAX_Y_CM = 11.3;
 
-// Crear los motores
+// Create Motors
 AccelStepper motor1(AccelStepper::DRIVER, STEP_PIN1, DIR_PIN1);
 AccelStepper motor2(AccelStepper::DRIVER, STEP_PIN2, DIR_PIN2);
 MultiStepper steppers;
@@ -22,37 +23,41 @@ MultiStepper steppers;
 Servo Marker;
 int MarkerAngle = 0;
 
+// Instruction Format
 struct Instruction {
   long x_steps;
   long y_steps;
   bool markerDown;
 };
 
+// Instructions Array.
 const Instruction path[] PROGMEM = {
-
+  // Insert Instructions of the desired drawing
 };
+
 const int numInstructions = sizeof(path) / sizeof(path[0]);
 int currentInstruction = 0;
 
 void setup() {
   Serial.begin(9600);
 
-  motor1.setPinsInverted(true, false, false);  // Invert X
-  motor2.setPinsInverted(false, false, false); // Y normal  
+  motor1.setPinsInverted(true, false, false);
+  motor2.setPinsInverted(false, false, false);
   
-  motor1.setMaxSpeed(3000);  // Or whatever speed you want
+  motor1.setMaxSpeed(3000);
   motor2.setMaxSpeed(3000);
   
   steppers.addStepper(motor1);
   steppers.addStepper(motor2);
 
-  // Inicializar servo
+  // Initialize Servomotor
   Marker.attach(SERVO_PIN);
   Marker.write(MarkerAngle);
 
 }
 
 void loop() {
+  // Follow Instructions
   if (currentInstruction < numInstructions) {
     Instruction inst;
     memcpy_P(&inst, &path[currentInstruction], sizeof(Instruction));
