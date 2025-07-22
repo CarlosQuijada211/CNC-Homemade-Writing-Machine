@@ -13,17 +13,13 @@
 #define JOYSTICK_BTN A3
 
 // Joystick button
-bool lastButtonState = HIGH; // Botón no presionado (pullup)
+bool lastButtonState = HIGH;
 
 // Servo motor
 Servo Marker;
 int MarkerAngle = 90;
 int currentMarkerAngle = -1;
 String serialInput = "";
-
-// Timing
-unsigned long lastServoMoveTime = 0;
-const unsigned long servoMoveInterval = 500; // ms between servo movements
 
 // Stepper config
 int motorDelay = 10;  // microseconds
@@ -41,11 +37,9 @@ void setup() {
   // Stepper pins
   pinMode(STEP_PIN1, OUTPUT);
   pinMode(DIR_PIN1, OUTPUT);
-  pinMode(ENABLE_PIN1, OUTPUT);
 
   pinMode(STEP_PIN2, OUTPUT);
   pinMode(DIR_PIN2, OUTPUT);
-  pinMode(ENABLE_PIN2, OUTPUT);
 
   // Joysticks
   pinMode(JOYSTICK_X, INPUT);
@@ -55,10 +49,6 @@ void setup() {
   // Servo
   Marker.attach(4);
   Marker.write(MarkerAngle);
-
-  // Enable stepper drivers initially (keep enabled)
-  digitalWrite(ENABLE_PIN1, LOW);
-  digitalWrite(ENABLE_PIN2, LOW);
 
   Serial.begin(9600);
 }
@@ -135,10 +125,10 @@ void loop() {
     if (motor2Active) motor2Steps += motor2DirPositive ? 1 : -1;
   }
   
-  // Leer botón del joystick (presionar para imprimir estados)
+  // Read joystickbutton
   bool buttonState = digitalRead(JOYSTICK_BTN);
   
-  // Detectar flanco de bajada (presionado)
+  // Detect Press
   if (lastButtonState == HIGH && buttonState == LOW) {
     Serial.print("Motor 1 position: ");
     Serial.println(motor1Steps);
