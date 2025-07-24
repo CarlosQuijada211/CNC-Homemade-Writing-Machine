@@ -2,26 +2,25 @@
 CNC Homemade writing machine made from cardboard and easily accesible materials, and driven by stepper motors, capable of rendering vector graphics using G-code-like instructions. 
 
 ## Project Overview
-### Introduction
-This is a custom-built CNC writing machine constructed primarily from cardboard and widely available electronic components. It operates using stepper motors and executes simplified, G-code-inspired instructions to reproduce vector-based line drawings. The design emphasizes affordability and accessibility, requiring no precision-manufactured parts or specialized fabrication tools.
 
-### Motivation
-This project emerged from a desire to better understand how mechanical, electrical, and software systems integrate in robotics. I set out to build a fully functional plotter from scratch, not only to explore CNC principles, but also to challenge myself with constrained materials and minimal budget. Along the way, I learned about motion control, instruction parsing, mechanical stability, and iterative design. The process sharpened my skills in debugging, creative problem-solving, and making engineering trade-offs under tight resource limits.
+### Introduction  
+This CNC-style writing machine was built from scratch using simple, affordable materials—primarily cardboard, wooden rods, and widely available electronic components. Driven by stepper motors and powered by an Arduino Mega, the system interprets simplified, G-code-like instructions to produce vector-based line drawings. The entire build emphasizes accessibility over precision, avoiding specialized tools or factory-made parts.
 
-### Features
-- Moves along two axes (X and Y)
-- Pen-lift mechanism controlled by servo motor
-- Executes a simplified vector instruction format inspired by G-code
-- Controlled via Arduino Mega + G-code parser
-- Powered by external 12V (stepper) and 5V (servo) supplies
+### Motivation  
+What began as a casual experiment with an Arduino board gradually evolved into a complete working machine. With no access to advanced tools or expensive components, the challenge became not just to build a CNC-like system, but to make it function using only what was on hand. The goal was never to create a replicable blueprint; it was about exploration, improvisation, and seeing how far careful iteration and creative problem-solving could take a simple idea. In the process, I learned a great deal about mechanical systems, instruction parsing, motion control, and the trade-offs involved when working within strict constraints.
 
-### Constraints and Scope
-- Not suitable for high-precision applications
-- Limited drawing area
-- Limited to simple, not very detailed drawings
-- Paper must be manually positioned and taped down
+### Features  
+- Two-axis (X/Y) motion using threaded rods and stepper motors  
+- Servo-controlled pen lift mechanism  
+- Executes custom vector instructions inspired by G-code  
+- Arduino Mega-based control system with a basic instruction parser  
+- Powered by external 12V and 5V supplies  
 
-These limitations are by design, reflecting the project's educational and proof-of-concept focus rather than production use.
+### Constraints and Scope  
+- Limited precision and drawing detail  
+- Small drawing area (approx. 11.3 cm x 13.5 cm)  
+- Manual paper alignment and tape-based mounting  
+- Not designed for reproducibility or mass production  
 
 ## Materials and Tools
 ### Electronics
@@ -148,7 +147,7 @@ The electronic control system is centered around an Arduino Mega, which controls
 ### Overview
 To convert an external image into drawing instructions for the machine, the input must pass through a structured software pipeline. The process begins in **Inkscape**, where the image is converted into a vector path, and then into **G-code** using the **J Tech Laser Tool extension**. This **G-code** is not directly compatible with the Arduino, so it is parsed and translated into a simplified, custom instruction format by a Python script.
 
-The central script, `interface.py`, provides a graphical interface that guides the user through this process. It asks for the name of the** G-code** file, handles translation via helper scripts, and offers an optional preview of the final drawing. It also splits the output into organized `.txt` files, each containing up to **2500** instructions to respect Arduino's memory constraints.
+The central script, `interface.py`, provides a graphical interface that guides the user through this process. It asks for the name of the **G-code** file, handles translation via helper scripts, and offers an optional preview of the final drawing. It also splits the output into organized `.txt` files, each containing up to **2500** instructions to respect Arduino's memory constraints.
 
 Finally, these processed instructions are inserted into the Arduino’s firmware, specifically the `CNCWritingMachine.ino` file, where they are executed to control the stepper motors and pen mechanism.
 
@@ -270,3 +269,52 @@ To generate G-code for the CNC writing machine, I use Inkscape version 0.92, the
   - An image is imported and converted into a bitmap.
   - The bitmap is vectorized, and I intentionally flatten Bézier curves with a flatness value of 0.1, increasing the number of nodes to maximize positional accuracy.
   - The resulting vector paths are then exported to G-code using the J Tech Laser Tool extension, ready for processing by the instruction generator.
+
+
+## Challenges and Engineering Decision
+### Problems Faced and Solutions
+
+#### **Transition from Version 1 to Version 2**
+The first attempt at this project barely "worked," but it served as a proof of concept: the core idea (using a screw-driven linear actuator) was sound, even if the implementation wasn’t. At the time, I didn’t know the technical term for it, but this first version validated that concept.
+
+It was built using two wooden pieces arranged in an L-shape to provide structure. A long threaded rod passed through this frame, connected to a motor with tape on one end and fixed to a ball bearing on the other. A thick metal rod ran parallel to the threaded rod to act as a rail, and the carriage was a wooden piece with nuts glued in a straight line down the middle, sliding along the rail with the help of a plastic guide.
+
+This version had multiple flaws: it was too large, fragile, prone to vibration, and poorly aligned. However, it laid the groundwork for a more refined design. The second version was scaled down and built with hard cardboard, much easier to cut precisely by hand. It also featured two wooden guide rods for better stability and smoother movement. This second version ultimately evolved into the final machine.
+
+#### **Vibration**
+Vibration was one of the most persistent challenges throughout development. The second version significantly reduced this issue by adding more structural support and reducing friction. However, the materials I used (primarily cardboard, straws, and wood) couldn’t eliminate vibrations entirely.
+
+The final version still exhibits some vibration, especially when the motors accelerate or decelerate. While it causes slight wobbling in lines, the effect is minor enough to be acceptable for most drawings.
+
+#### **Z-Axis: Pen Lifting Mechanism**
+Creating a reliable Z-axis was one of the most difficult problems. Since everything was cut and assembled by hand, the X-axis wasn’t perfectly level. This meant that simply gluing a pen to the carriage wouldn’t work—the pen would press too hard in some places and barely touch the paper in others.
+
+The first Z-axis attempt involved a servo motor rotating a gear, which meshed with a rack gear attached to the pen. The pen itself was mounted on two parallel straws, which slid along wooden rods in the carriage; this allowed vertical movement while keeping the pen in place. Unfortunately, the system wasn’t precise enough. The small vertical distances required made the servo's resolution a problem, and the plastic gears often slipped, requiring constant recalibration.
+
+This system was eventually abandoned and replaced by a spring-loaded pen. In this final version, a spring compensates for uneven surfaces, and a string controlled by a servo motor lifts the pen when needed. This simplified the Z-axis and greatly improved reliability.
+
+#### **Drawing Automation**
+Initially, I manually controlled the motors through Arduino code, without using any libraries. This was sufficient for testing and basic manual drawing, but it became a problem when trying to draw diagonal lines or curves. I experimented with adapting Bresenham’s line algorithm, which helped with straight lines at arbitrary angles, but overall control was still imprecise.
+
+To solve this, I adopted the AccelStepper library, and specifically its MultiStepper feature. This allowed me to coordinate both motors smoothly, resulting in consistent and accurate line drawing, including diagonal movements.
+
+#### **Instruction Automation**
+Generating drawing instructions was another major hurdle. My first approach was to write a custom Python script using OpenCV to trace image outlines and convert them into drawing commands. Unfortunately, the results were rough and barely resembled the original images.
+
+Instead, I turned to existing tools developed for industrial machines. I used Inkscape (an open-source vector graphics editor) with the J Tech Laser Tool extension to export images as G-code. From there, I wrote Python scripts that could:
+
+- Parse the G-code,
+- Preview the drawing using Python’s turtle module,
+- And organize the instructions into smaller files for upload to the Arduino.
+
+This workflow enabled full automation of the drawing process in the final version. The final interface included an integrated Python GUI to make managing and sending instructions easier.
+
+### Design Tradeoffs
+#### Cheap Materials vs. Vibration Control
+To keep the project low-cost and accessible, I used recycled and easily available materials like cardboard, straws, wooden rods, and hot glue. These were ideal for a solo, low-budget build and allowed me to prototype quickly without needing specialized tools. However, such materials are not ideal for absorbing motor vibrations. Despite efforts to minimize vibration (especially by reinforcing the structure with wooden supports) the final version still exhibits noticeable vibration. This causes the pen to draw in tiny spirals rather than clean straight lines, slightly reducing drawing precision. Still, this tradeoff was essential for making the project feasible in the first place.
+
+#### Ease of Construction vs. Mechanical Precision
+Since I didn’t have access to precise cutting tools or a 3D printer, all parts were cut by hand using scissors, cutters, and hand saws. While this made the project accessible and flexible to iterate on, it also introduced structural imperfections such as uneven surfaces, slightly tilted parts, and inconsistent measurements. These issues directly impacted precision and made mechanical alignment difficult. To work around these challenges, I developed adaptive components such as the spring-loaded pen, which compensated for slight variations in surface height and construction error.
+
+#### Compact Design vs. Drawing Detail
+Building a smaller machine made the design easier to manage and build, especially for a single person working with limited space and tools. The reduced scale meant fewer materials and tighter tolerances, which helped maintain mechanical consistency. However, it also limited the machine’s drawing area to 11.3 cm by 13.5 cm. While this is sufficient for most drawings, it imposes a limit on detail. Lines that are too close together may blend due to vibration and space constraints. A larger machine could have reduced the impact of vibration on drawing quality, but it would have required significantly more effort and resources to build.
