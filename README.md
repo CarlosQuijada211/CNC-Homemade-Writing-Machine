@@ -20,7 +20,25 @@ What began as a casual experiment with an Arduino board gradually evolved into a
 - Limited precision and drawing detail  
 - Small drawing area (approx. 11.3 cm x 13.5 cm)  
 - Manual paper alignment and tape-based mounting  
-- Not designed for reproducibility or mass production  
+- Not designed for reproducibility or mass production
+
+### Demo Videos
+
+<h3 align="center">Final Version Showcase </h3>
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=7NNL3sPixzk" target="_blank">
+    <img src="https://img.youtube.com/vi/7NNL3sPixzk/0.jpg" alt="Final Version" width="480"/>
+  </a>
+</p>
+
+<h3 align="center"> Project Evolution </h3>
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=qihJwingBWc" target="_blank">
+    <img src="https://img.youtube.com/vi/qihJwingBWc/0.jpg" alt="Build Timeline" width="480"/>
+  </a>
+</p>
 
 ## Materials and Tools
 ### Electronics
